@@ -1,17 +1,7 @@
-import {
-    Box,
-    FormControl,
-    FormHelperText,
-    FormLabel,
-    IconButton,
-    InputAdornment,
-    OutlinedInput,
-    OutlinedInputProps,
-    Typography
-} from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useState, useEffect } from 'react';
-import { Control, useController } from 'react-hook-form';
+import { Box, FormControl, FormHelperText, FormLabel, IconButton, InputAdornment, OutlinedInput, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useController } from 'react-hook-form';
 
 export function PasswordField({ name, control, label, disabled, ...inputProps }) {
     const {

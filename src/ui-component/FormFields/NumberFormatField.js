@@ -1,8 +1,8 @@
-import { Box, FormControl, FormHelperText, FormLabel, TextField, TextFieldProps, Typography } from '@mui/material';
-import { Control, useController } from 'react-hook-form';
-import NumberFormat from 'react-number-format';
+import { TextField } from '@mui/material';
 import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
+import { useController } from 'react-hook-form';
+import NumberFormat from 'react-number-format';
 
 const NumberFormatCustom = forwardRef((props, ref) => {
     const { onChange, ...other } = props;
@@ -34,7 +34,7 @@ NumberFormatCustom.propTypes = {
 export function NumberFormatField({ name, control, label, ...inputProps }) {
     const {
         field: { value, onChange, onBlur, ref },
-        fieldState: { invalid, error }
+        fieldState: { invalid }
     } = useController({
         name,
         control

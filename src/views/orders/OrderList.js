@@ -1,12 +1,10 @@
-// icons
 import { AddCircle, ContentCopyTwoTone, FilterList, PrintTwoTone, SearchOutlined } from '@mui/icons-material';
 import BlockIcon from '@mui/icons-material/Block';
 import DoneIcon from '@mui/icons-material/Done';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import DateAdapter from '@mui/lab/AdapterMoment';
 import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import { Chip, Drawer, InputAdornment, Menu, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Chip, Drawer, InputAdornment, Stack, TextField, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
@@ -22,8 +20,6 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import { visuallyHidden } from '@mui/utils';
-// assets
-import productEmptyImg from 'assets/images/products/product-empty.png';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
@@ -221,7 +217,6 @@ export default function OrderList({ data }) {
     const [selected, setSelected] = useState([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [anchorEl, setAnchorEl] = useState(null);
     const [open, setOpen] = useState(false);
 
     const [productItem, setProductItem] = useState({
@@ -245,13 +240,6 @@ export default function OrderList({ data }) {
 
     const handleToggle = () => {
         setOpen(!open);
-    };
-
-    const handleOpenActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
     };
 
     const handleRequestSort = (event, property) => {

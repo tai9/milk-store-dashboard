@@ -16,8 +16,7 @@ export default function ProductForm({ initialValues, onSubmit }) {
     const {
         control,
         handleSubmit,
-        formState: { isSubmitting },
-        setValue
+        formState: { isSubmitting }
     } = useForm({
         defaultValues: initialValues
         // resolver: yupResolver()

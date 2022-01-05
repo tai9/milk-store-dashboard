@@ -4,7 +4,7 @@ import { useController } from 'react-hook-form';
 export function InputField({ name, control, label, ...inputProps }) {
     const {
         field: { value, onChange, onBlur, ref },
-        fieldState: { invalid, error }
+        fieldState: { invalid }
     } = useController({
         name,
         control

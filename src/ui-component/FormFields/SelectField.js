@@ -1,5 +1,5 @@
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from '@mui/material';
-import { Control, useController } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 
 export function SelectField({ name, control, label, disabled, options }) {
     const {

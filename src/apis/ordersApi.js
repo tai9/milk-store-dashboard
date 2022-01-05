@@ -2,7 +2,7 @@ import axiosClient from 'axios-client';
 import { ordersURL } from 'constants/baseURL';
 
 export const ordersApi = {
-    getAll(filter) {
+    getAll() {
         return axiosClient.get(ordersURL);
     },
     getById(id) {

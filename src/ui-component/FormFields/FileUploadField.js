@@ -63,7 +63,7 @@ const dropzone = {
     cursor: 'pointer'
 };
 
-export function FileUploadField({ name, control, label, ...inputProps }) {
+export function FileUploadField({ name, control }) {
     const {
         field: { value, onChange }
     } = useController({

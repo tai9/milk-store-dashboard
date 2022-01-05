@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import PropTypes from 'prop-types';
 import moment from 'moment';
 import { useReactToPrint } from 'react-to-print';
 
@@ -61,7 +60,7 @@ const Invoice = () => {
         })();
     }, [invoiceId]);
 
-    const reactToPrintContent = useCallback(() => componentRef.current, [componentRef.current]);
+    const reactToPrintContent = useCallback(() => componentRef.current, []);
 
     const handlePrint = useReactToPrint({
         content: reactToPrintContent,

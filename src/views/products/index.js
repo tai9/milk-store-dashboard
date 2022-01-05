@@ -1,19 +1,10 @@
-import PropTypes from 'prop-types';
-
-// material-ui
-import { Box, Card, Grid, Typography } from '@mui/material';
-
-// project imports
-import SubCard from 'ui-component/cards/SubCard';
-import MainCard from 'ui-component/cards/MainCard';
-import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
-import { gridSpacing } from 'store/types/common';
-
-import ProductList from './ProductList';
+import { productsApi } from 'apis';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { productsApi } from 'apis';
 import { fetchProductList, selectProductList } from 'store/slices/productSlice';
+import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
+import MainCard from 'ui-component/cards/MainCard';
+import ProductList from './ProductList';
 
 const Products = () => {
     const productList = useSelector(selectProductList);
