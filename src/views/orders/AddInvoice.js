@@ -1,10 +1,11 @@
-import { productsApi } from 'apis';
+import { ordersApi, productsApi } from 'apis';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductList, selectProductList } from 'store/slices/productSlice';
 import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 import MainCard from 'ui-component/cards/MainCard';
 import InvoiceForm from './InvoiceForm';
+import { toast } from 'react-toastify';
 
 export const getInvoiceStatus = (status, theme) => {
     switch (status) {
@@ -37,14 +38,23 @@ const AddInvoice = () => {
     }, [dispatch]);
 
     const initialValues = {
-        name: '',
-        price: 0,
-        quantity: 0,
-        preview: []
+        customerName: '',
+        address: '',
+        status: 'Processing',
+        totalAmount: 0,
+        totalPayment: 0,
+        products: []
     };
 
     const handleSubmitUserForm = async (formValues) => {
-        console.log(formValues);
+        try {
+            console.log(formValues);
+            await ordersApi.add(formValues);
+            toast.success('Add invoice success');
+        } catch (err) {
+            console.log('Failed to add invoice', err);
+            toast.error('Something went wrong.');
+        }
     };
 
     return (

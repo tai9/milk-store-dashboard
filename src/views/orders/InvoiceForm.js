@@ -15,10 +15,8 @@ import {
     Typography
 } from '@mui/material';
 import { Box } from '@mui/system';
-import PropTypes from 'prop-types';
-import { forwardRef, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import NumberFormat from 'react-number-format';
 // third-party
 import PerfectScrollbar from 'react-perfect-scrollbar';
 // project imports
@@ -26,47 +24,12 @@ import { gridSpacing } from 'store/types/common';
 import SubCard from 'ui-component/cards/SubCard';
 import { InputField } from 'ui-component/FormFields';
 import Logo from 'ui-component/Logo';
-
-const NumberFormatCustom = forwardRef((props, ref) => {
-    const { onChange, ...other } = props;
-
-    return (
-        <NumberFormat
-            {...other}
-            getInputRef={ref}
-            onValueChange={(values) => {
-                onChange({
-                    target: {
-                        name: props.name,
-                        value: values.value
-                    }
-                });
-            }}
-            isAllowed={(values) => {
-                const { floatValue } = values;
-                return floatValue >= 5 && floatValue <= 10000;
-            }}
-            thousandSeparator
-            isNumericString
-        />
-    );
-});
-
-NumberFormatCustom.propTypes = {
-    name: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired
-};
+import numberWithCommas from 'utils/number-with-commas';
 
 export default function InvoiceForm({ productList, initialValues, onSubmit }) {
-    // const schemaRequired = yup
-    //     .object({
-    //         transactionHashes: yup.array().min(1, t('Please select transaction hash')).required(t('Please select transaction hash'))
-    //     })
-    //     .required();
     const theme = useTheme();
 
-    const [amountList, setAmountList] = useState([]);
-    const [totalList, setTotalList] = useState([]);
+    const [products, setProducts] = useState([]);
 
     const {
         control,
@@ -74,11 +37,16 @@ export default function InvoiceForm({ productList, initialValues, onSubmit }) {
         formState: { isSubmitting }
     } = useForm({
         defaultValues: initialValues
-        // resolver: yupResolver()
     });
 
     const handleSubmitForm = async (formValues) => {
-        await onSubmit?.(formValues);
+        let totalAmount = 0;
+        let totalPayment = 0;
+        products.forEach((p) => {
+            totalAmount += p.amount;
+            totalPayment += p.total;
+        });
+        await onSubmit?.({ ...formValues, totalAmount, totalPayment, products });
     };
 
     return (
@@ -117,38 +85,42 @@ export default function InvoiceForm({ productList, initialValues, onSubmit }) {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {productList?.data.map((row, idx) => (
-                                                <TableRow key={row.id}>
+                                            {productList?.data.map((row) => (
+                                                <TableRow key={row._id}>
                                                     <TableCell colSpan={3}>
                                                         <Typography fontWeight="bold">{row.name || '-'}</Typography>
                                                     </TableCell>
                                                     <TableCell align="right">{row.quantity || '-'}</TableCell>
-                                                    <TableCell align="right">{row.price || '-'}</TableCell>
+                                                    <TableCell align="right">{numberWithCommas(row.price) || '-'}</TableCell>
                                                     <TableCell align="right">
                                                         <TextField
-                                                            id={row.id}
                                                             variant="outlined"
                                                             type="number"
-                                                            defaultValue={0}
-                                                            value={amountList[idx]}
+                                                            defaultValue="0"
                                                             onChange={(e) => {
-                                                                setAmountList((prev) => {
-                                                                    const data = [...prev];
-                                                                    data[idx] = +e.target.value;
-                                                                    return data;
-                                                                });
-                                                                setTotalList((prev) => {
-                                                                    const data = [...prev];
-                                                                    data[idx] = (+e.target.value * row.price) / 1000;
-                                                                    return data;
-                                                                });
+                                                                const { _id, name, price } = row;
+                                                                const productsTemp = [...products];
+                                                                const productIndex = productsTemp.findIndex((x) => x._id === _id);
+                                                                if (productIndex !== -1) {
+                                                                    productsTemp[productIndex].amount = +e.target.value;
+                                                                    productsTemp[productIndex].total = +e.target.value * price;
+                                                                } else {
+                                                                    productsTemp.push({
+                                                                        _id,
+                                                                        name,
+                                                                        price,
+                                                                        amount: +e.target.value,
+                                                                        total: +e.target.value * price
+                                                                    });
+                                                                }
+                                                                setProducts(productsTemp);
                                                             }}
                                                             sx={{ width: 70 }}
                                                             InputProps={{ inputProps: { min: 0, max: row.quantity } }}
                                                         />
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        {totalList[idx] || 0} {totalList[idx] > 0 ? '000' : ''}₫
+                                                        {numberWithCommas(products.find((x) => x._id === row._id)?.total || 0)}₫
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -162,19 +134,20 @@ export default function InvoiceForm({ productList, initialValues, onSubmit }) {
                                     <Stack spacing={1}>
                                         <Typography fontWeight="bold">
                                             Amount:{' '}
-                                            {amountList.length > 0
-                                                ? amountList.reduce((previousValue, currentValue) => previousValue + currentValue)
+                                            {products.length > 0
+                                                ? products.reduce((previousValue, currentValue) => previousValue + currentValue.amount, 0)
                                                 : 0}
                                         </Typography>
                                         <Typography fontWeight="bold" fontSize="large" color="primary">
                                             Total:{' '}
-                                            {totalList.length > 0
-                                                ? totalList.reduce((previousValue, currentValue) => previousValue + currentValue)
-                                                : 0}{' '}
-                                            {totalList.length > 0 &&
-                                            totalList.reduce((previousValue, currentValue) => previousValue + currentValue) > 0
-                                                ? '000'
-                                                : ''}
+                                            {products.length > 0
+                                                ? numberWithCommas(
+                                                      products.reduce(
+                                                          (previousValue, currentValue) => previousValue + currentValue.total,
+                                                          0
+                                                      )
+                                                  )
+                                                : 0}
                                             ₫
                                         </Typography>
                                     </Stack>

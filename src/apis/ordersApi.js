@@ -10,5 +10,8 @@ export const ordersApi = {
     },
     update(id, data) {
         return axiosClient.put(`${ordersURL}/${id}`, data);
+    },
+    add(data) {
+        return axiosClient.post(ordersURL, data);
     }
 };

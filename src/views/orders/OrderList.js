@@ -73,10 +73,10 @@ const headCells = [
         label: 'Customer Name'
     },
     {
-        id: 'quantity',
+        id: 'totalAmount',
         numeric: false,
         disablePadding: false,
-        label: 'Quantity'
+        label: 'Total Amount'
     },
     {
         id: 'totalPayment',
@@ -373,7 +373,7 @@ export default function OrderList({ data }) {
                                                 {row.customerName || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {row.quantity || '-'}
+                                                {row.totalAmount || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 {row.totalPayment || '-'}
@@ -393,20 +393,24 @@ export default function OrderList({ data }) {
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Tooltip title="Confirm">
-                                                    <IconButton
-                                                        onClick={() => handleUpdateOrderStatus(row._id, 'Completed')}
-                                                        disabled={row.status === 'Canceled' || row.status === 'Completed'}
-                                                    >
-                                                        <DoneIcon fontSize="small" />
-                                                    </IconButton>
+                                                    <div>
+                                                        <IconButton
+                                                            disabled={row.status === 'Canceled' || row.status === 'Completed'}
+                                                            onClick={() => handleUpdateOrderStatus(row._id, 'Completed')}
+                                                        >
+                                                            <DoneIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </div>
                                                 </Tooltip>
                                                 <Tooltip title="Cancel">
-                                                    <IconButton
-                                                        disabled={row.status === 'Canceled' || row.status === 'Completed'}
-                                                        onClick={() => handleUpdateOrderStatus(row._id, 'Canceled')}
-                                                    >
-                                                        <BlockIcon fontSize="small" />
-                                                    </IconButton>
+                                                    <div>
+                                                        <IconButton
+                                                            disabled={row.status === 'Canceled' || row.status === 'Completed'}
+                                                            onClick={() => handleUpdateOrderStatus(row._id, 'Canceled')}
+                                                        >
+                                                            <BlockIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </div>
                                                 </Tooltip>
                                             </TableCell>
                                         </TableRow>

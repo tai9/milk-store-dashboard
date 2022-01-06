@@ -112,7 +112,7 @@ const Invoice = () => {
                                     <Grid item xs={9}>
                                         <Chip
                                             size="small"
-                                            label={orderDetails.status || 'Active'}
+                                            label={orderDetails.status || 'Loading...'}
                                             sx={{
                                                 color: theme.palette.background.default,
                                                 bgcolor: getInvoiceStatus(orderDetails.status, theme)

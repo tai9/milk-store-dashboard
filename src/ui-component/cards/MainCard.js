@@ -1,9 +1,11 @@
 import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { useNavigate } from 'react-router';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
-import { Card, CardContent, CardHeader, Divider, Typography } from '@mui/material';
+import { Card, CardContent, CardHeader, Divider, Typography, Stack } from '@mui/material';
 
 // constant
 const headerSX = {
@@ -31,6 +33,7 @@ const MainCard = forwardRef(
         ref
     ) => {
         const theme = useTheme();
+        const navigate = useNavigate();
 
         return (
             <Card
@@ -46,9 +49,29 @@ const MainCard = forwardRef(
                 }}
             >
                 {/* card header and action */}
-                {!darkTitle && title && <CardHeader sx={headerSX} title={title} action={secondary} />}
+                {!darkTitle && title && (
+                    <CardHeader
+                        sx={headerSX}
+                        title={
+                            <Stack direction="row" alignItems="center">
+                                <ArrowBackIosIcon color="action" fontSize="small" sx={{ cursor: 'pointer' }} onClick={() => navigate(-1)} />
+                                <Typography variant="h3">{title}</Typography>
+                            </Stack>
+                        }
+                        action={secondary}
+                    />
+                )}
                 {darkTitle && title && (
-                    <CardHeader sx={headerSX} title={<Typography variant="h3">{title}</Typography>} action={secondary} />
+                    <CardHeader
+                        sx={headerSX}
+                        title={
+                            <Typography variant="h3">
+                                <ArrowBackIosIcon />
+                                {title}
+                            </Typography>
+                        }
+                        action={secondary}
+                    />
                 )}
 
                 {/* content & header divider */}
