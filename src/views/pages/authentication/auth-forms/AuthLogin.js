@@ -1,7 +1,5 @@
 import { useState } from 'react';
 
-import { useNavigate } from 'react-router';
-
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import {
@@ -43,8 +41,6 @@ const FirebaseLogin = ({ ...others }) => {
     const scriptedRef = useScriptRef();
     const [checked, setChecked] = useState(true);
 
-    const navigate = useNavigate();
-
     const [showPassword, setShowPassword] = useState(false);
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
@@ -57,7 +53,7 @@ const FirebaseLogin = ({ ...others }) => {
     const handleLoginSuccess = (data) => {
         cookies.set('token', data.access_token);
         cookies.set('username', data.name);
-        navigate('/', { replace: true });
+        window.location.replace('/');
     };
 
     return (
