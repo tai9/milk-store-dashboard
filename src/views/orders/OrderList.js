@@ -395,14 +395,14 @@ export default function OrderList({ data }) {
                                                 <Tooltip title="Confirm">
                                                     <IconButton
                                                         onClick={() => handleUpdateOrderStatus(row._id, 'Completed')}
-                                                        // disabled={row.status === 'Canceled' || row.status === 'Completed'}
+                                                        disabled={row.status === 'Canceled' || row.status === 'Completed'}
                                                     >
                                                         <DoneIcon fontSize="small" />
                                                     </IconButton>
                                                 </Tooltip>
                                                 <Tooltip title="Cancel">
                                                     <IconButton
-                                                        // disabled={row.status === 'Canceled' || row.status === 'Completed'}
+                                                        disabled={row.status === 'Canceled' || row.status === 'Completed'}
                                                         onClick={() => handleUpdateOrderStatus(row._id, 'Canceled')}
                                                     >
                                                         <BlockIcon fontSize="small" />
