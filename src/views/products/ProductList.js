@@ -6,7 +6,7 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import DateAdapter from '@mui/lab/AdapterMoment';
 import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import { Chip, Drawer, InputAdornment, Menu, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Chip, Drawer, InputAdornment, Menu, MenuItem, Stack, TextField, Typography, FormControl, InputLabel, Select } from '@mui/material';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
@@ -22,12 +22,16 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import { visuallyHidden } from '@mui/utils';
+import { productsApi } from 'apis';
 // assets
 import productEmptyImg from 'assets/images/products/product-empty.png';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProductList, selectProductList } from 'store/slices/productSlice';
 import ProductForm from './ProductForm';
+import { useDebouncedCallback } from 'use-debounce';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -83,19 +87,19 @@ const headCells = [
         label: 'Preview'
     },
     {
-        id: 'created_date',
+        id: 'createdDate',
         numeric: false,
         disablePadding: false,
         label: 'Created Date'
     },
     {
-        id: 'updated_date',
+        id: 'updatedDate',
         numeric: false,
         disablePadding: false,
         label: 'Updated Date'
     },
     {
-        id: 'expiry_date',
+        id: 'expiryDate',
         numeric: false,
         disablePadding: false,
         label: 'Expiry Date'
@@ -155,11 +159,12 @@ EnhancedTableHead.propTypes = {
     orderBy: PropTypes.string.isRequired
 };
 
-const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct }) => (
+const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct, handleStatusChange, handleSearchChange }) => (
     <Toolbar
         sx={{
             pl: { sm: 2 },
-            pr: { xs: 1, sm: 1 }
+            pr: { xs: 1, sm: 1 },
+            justifyContent: 'space-between'
             // ...(numSelected > 0 && {
             //     bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity)
             // })
@@ -171,6 +176,8 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct }) => (
                 id="outlined-start-adornment"
                 sx={{ width: '30ch' }}
                 size="small"
+                defaultValue=""
+                onChange={handleSearchChange}
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
@@ -188,9 +195,25 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct }) => (
                     renderInput={(params) => <TextField size="small" {...params} />}
                 />
             </LocalizationProvider>
+            <FormControl sx={{ minWidth: 120, textAlign: 'center' }}>
+                <InputLabel id="demo-simple-select-label">Status</InputLabel>
+                <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="Status"
+                    size="small"
+                    defaultValue="All"
+                    // value={age}
+                    onChange={handleStatusChange}
+                >
+                    <MenuItem value="All">All</MenuItem>
+                    <MenuItem value="Active">Active</MenuItem>
+                    <MenuItem value="Deactivate">Deactivate</MenuItem>
+                </Select>
+            </FormControl>
         </Stack>
 
-        <Stack direction="row" justifyContent="flex-end" width="100%">
+        <Stack direction="row" justifyContent="flex-end">
             <Tooltip title="Copy">
                 <IconButton>
                     <ContentCopyTwoTone />
@@ -218,11 +241,15 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct }) => (
 EnhancedTableToolbar.propTypes = {
     date: PropTypes.string,
     handleDateChange: PropTypes.func.isRequired,
-    handleAddProduct: PropTypes.func.isRequired
+    handleAddProduct: PropTypes.func.isRequired,
+    handleStatusChange: PropTypes.func.isRequired,
+    handleSearchChange: PropTypes.func.isRequired
 };
 
-export default function ProductList({ data }) {
+export default function ProductList() {
     const theme = useTheme();
+    const dispatch = useDispatch();
+    const productList = useSelector(selectProductList);
 
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('calories');
@@ -239,9 +266,17 @@ export default function ProductList({ data }) {
         preview: []
     });
     const [filters, setFilters] = useState({
-        search: '',
-        expiry_date: moment().format()
+        name: '',
+        expiryDate: null,
+        status: undefined
     });
+
+    const debounced = useDebouncedCallback((value) => {
+        setFilters((prev) => ({
+            ...prev,
+            name: value
+        }));
+    }, 500);
 
     const initialValues = {
         name: '',
@@ -250,6 +285,23 @@ export default function ProductList({ data }) {
         preview: [],
         ...productItem
     };
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const { name, expiryDate } = filters;
+                console.log(filters);
+                const response = await productsApi.getAll({
+                    ...filters,
+                    name: name === '' ? undefined : name,
+                    expiryDate: expiryDate === null ? undefined : expiryDate
+                });
+                dispatch(fetchProductList(response));
+            } catch (error) {
+                console.log('Failed to fetch product list', error);
+            }
+        })();
+    }, [filters, dispatch]);
 
     const handleToggle = () => {
         setOpen(!open);
@@ -270,7 +322,7 @@ export default function ProductList({ data }) {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelecteds = data.map((n) => n.name);
+            const newSelecteds = productList.data.map((n) => n.name);
             setSelected(newSelecteds);
             return;
         }
@@ -309,7 +361,7 @@ export default function ProductList({ data }) {
     const isSelected = (name) => selected.indexOf(name) !== -1;
 
     // Avoid a layout jump when reaching the last page with empty data.
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
+    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - productList.data.length) : 0;
 
     const handleSubmitUserForm = async (formValues) => {
         console.log(formValues);
@@ -318,16 +370,30 @@ export default function ProductList({ data }) {
     const handleDateChange = (date) => {
         setFilters((prev) => ({
             ...prev,
-            expiry_date: date
+            expiryDate: new Date(date).toISOString()
         }));
+    };
+
+    const handleStatusChange = (event) => {
+        const { value } = event.target;
+        setFilters((prev) => ({
+            ...prev,
+            status: value === 'All' ? undefined : value
+        }));
+    };
+
+    const handleSearchChange = (event) => {
+        debounced(event.target.value);
     };
 
     return (
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
                 <EnhancedTableToolbar
-                    date={filters.expiry_date}
+                    date={filters.expiryDate}
                     handleDateChange={handleDateChange}
+                    handleStatusChange={handleStatusChange}
+                    handleSearchChange={handleSearchChange}
                     handleAddProduct={() => {
                         setProductItem({
                             name: '',
@@ -345,16 +411,17 @@ export default function ProductList({ data }) {
                             orderBy={orderBy}
                             onSelectAllClick={handleSelectAllClick}
                             onRequestSort={handleRequestSort}
-                            rowCount={data.length}
+                            rowCount={productList.data.length}
                         />
                         <TableBody>
                             {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                  data.slice().sort(getComparator(order, orderBy)) */}
-                            {stableSort(data, getComparator(order, orderBy))
+                            {stableSort(productList.data, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
                                     const isItemSelected = isSelected(row.name);
                                     const labelId = `enhanced-table-checkbox-${index}`;
+                                    const isExpired = new Date(row.expiryDate) - new Date() < 0;
 
                                     return (
                                         <TableRow
@@ -362,7 +429,10 @@ export default function ProductList({ data }) {
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
                                             key={row.name}
-                                            sx={{ cursor: 'pointer' }}
+                                            sx={{
+                                                cursor: 'pointer',
+                                                backgroundColor: isExpired ? theme.palette.orange.light : theme.palette.background.default
+                                            }}
                                         >
                                             <TableCell
                                                 component="th"
@@ -385,13 +455,13 @@ export default function ProductList({ data }) {
                                                 </Box>
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {moment(row.created_date).format('DD-MM-YYYY, h:mm A') || '-'}
+                                                {moment(row.createdDate).format('DD-MM-YYYY, h:mm A') || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {moment(row.updated_date).format('DD-MM-YYYY, h:mm A') || '-'}
+                                                {moment(row.updatedDate).format('DD-MM-YYYY, h:mm A') || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {moment(row.expiry_date).format('DD-MM-YYYY, h:mm A') || '-'}
+                                                {moment(row.expiryDate).format('DD-MM-YYYY, h:mm A') || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 <Chip
@@ -459,7 +529,7 @@ export default function ProductList({ data }) {
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
-                    count={data.length}
+                    count={productList.data.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
@@ -487,11 +557,3 @@ export default function ProductList({ data }) {
         </Box>
     );
 }
-
-ProductList.defaultProps = {
-    data: []
-};
-
-ProductList.propTypes = {
-    data: PropTypes.array.isRequired || []
-};

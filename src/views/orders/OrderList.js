@@ -2,7 +2,7 @@ import { AddCircle, ContentCopyTwoTone, FilterList, PrintTwoTone, SearchOutlined
 import BlockIcon from '@mui/icons-material/Block';
 import DoneIcon from '@mui/icons-material/Done';
 import DateAdapter from '@mui/lab/AdapterMoment';
-import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
+import DatePicker from '@mui/lab/DatePicker';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import { Chip, Drawer, InputAdornment, Stack, TextField, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -85,7 +85,7 @@ const headCells = [
         label: 'Total Payment'
     },
     {
-        id: 'created_date',
+        id: 'createdDate',
         numeric: false,
         disablePadding: false,
         label: 'Created Date'
@@ -170,8 +170,8 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct }) => (
                 }}
             />
             <LocalizationProvider dateAdapter={DateAdapter}>
-                <DesktopDatePicker
-                    label="Expiry Date"
+                <DatePicker
+                    label="Created Date"
                     inputFormat="DD/MM/YYYY"
                     value={date}
                     onChange={handleDateChange}
@@ -231,7 +231,7 @@ export default function OrderList({ data }) {
     });
     const [filters, setFilters] = useState({
         search: '',
-        expiry_date: moment().format()
+        expiryDate: null
     });
 
     const initialValues = {
@@ -302,7 +302,7 @@ export default function OrderList({ data }) {
     const handleDateChange = (date) => {
         setFilters((prev) => ({
             ...prev,
-            expiry_date: date
+            expiryDate: date
         }));
     };
 
@@ -322,7 +322,7 @@ export default function OrderList({ data }) {
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
                 <EnhancedTableToolbar
-                    date={filters.expiry_date}
+                    date={filters.expiryDate}
                     handleDateChange={handleDateChange}
                     handleAddProduct={() => {
                         setProductItem({
@@ -379,7 +379,7 @@ export default function OrderList({ data }) {
                                                 {row.totalPayment || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {moment(row.created_date).format('DD-MM-YYYY, h:mm A') || '-'}
+                                                {moment(row.createdDate).format('DD-MM-YYYY, h:mm A') || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 <Chip

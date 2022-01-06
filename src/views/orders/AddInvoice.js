@@ -6,6 +6,7 @@ import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
 import MainCard from 'ui-component/cards/MainCard';
 import InvoiceForm from './InvoiceForm';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router';
 
 export const getInvoiceStatus = (status, theme) => {
     switch (status) {
@@ -23,6 +24,7 @@ export const getInvoiceStatus = (status, theme) => {
 const AddInvoice = () => {
     const productList = useSelector(selectProductList);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         (async () => {
@@ -48,9 +50,9 @@ const AddInvoice = () => {
 
     const handleSubmitUserForm = async (formValues) => {
         try {
-            console.log(formValues);
             await ordersApi.add(formValues);
             toast.success('Add invoice success');
+            navigate('/orders');
         } catch (err) {
             console.log('Failed to add invoice', err);
             toast.error('Something went wrong.');
