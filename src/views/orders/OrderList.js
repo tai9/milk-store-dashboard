@@ -28,7 +28,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { fetchProductList } from 'store/slices/productSlice';
 import { getInvoiceStatus } from './Invoice';
-import ProductForm from './ProductForm';
+import InvoiceForm from './InvoiceForm';
 import { toast } from 'react-toastify';
 
 function descendingComparator(a, b, orderBy) {
@@ -331,7 +331,7 @@ export default function OrderList({ data }) {
                             quantity: 0,
                             preview: []
                         });
-                        handleToggle();
+                        navigate('/orders/add');
                     }}
                 />
                 <TableContainer>
@@ -367,24 +367,24 @@ export default function OrderList({ data }) {
                                                 padding="normal"
                                                 onClick={(event) => handleClick(event, row)}
                                             >
-                                                <Typography fontWeight="bold">#{row.seqId}</Typography>
+                                                <Typography fontWeight="bold">#{row.seqId || '-'}</Typography>
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {row.customerName}
+                                                {row.customerName || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {row.quantity}
+                                                {row.quantity || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {row.totalPayment}
+                                                {row.totalPayment || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {moment(row.created_date).format('DD-MM-YYYY, h:mm A')}
+                                                {moment(row.created_date).format('DD-MM-YYYY, h:mm A') || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 <Chip
                                                     size="small"
-                                                    label={row.status}
+                                                    label={row.status || 'Loading...'}
                                                     sx={{
                                                         color: theme.palette.background.default,
                                                         bgcolor: getInvoiceStatus(row.status, theme)
@@ -447,10 +447,10 @@ export default function OrderList({ data }) {
             >
                 <Box px={2} py={4}>
                     <Typography component="h3" variant="h3">
-                        Product Information
+                        Invoice Information
                     </Typography>
                 </Box>
-                <ProductForm initialValues={initialValues} onSubmit={handleSubmitUserForm} />
+                <InvoiceForm initialValues={initialValues} onSubmit={handleSubmitUserForm} />
             </Drawer>
         </Box>
     );

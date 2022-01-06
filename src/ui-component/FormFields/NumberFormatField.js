@@ -21,7 +21,6 @@ const NumberFormatCustom = forwardRef((props, ref) => {
             }}
             thousandSeparator
             isNumericString
-            prefix="$"
         />
     );
 });
@@ -31,7 +30,7 @@ NumberFormatCustom.propTypes = {
     onChange: PropTypes.func.isRequired
 };
 
-export function NumberFormatField({ name, control, label, ...inputProps }) {
+export function NumberFormatField({ name, control, label, InputProps, ...props }) {
     const {
         field: { value, onChange, onBlur, ref },
         fieldState: { invalid }
@@ -54,9 +53,10 @@ export function NumberFormatField({ name, control, label, ...inputProps }) {
             // size="small"
             fullWidth
             InputProps={{
-                inputComponent: NumberFormatCustom
+                inputComponent: NumberFormatCustom,
+                ...InputProps
             }}
-            {...inputProps}
+            {...props}
         />
     );
 }

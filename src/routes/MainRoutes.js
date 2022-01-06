@@ -19,8 +19,11 @@ const ProductsPage = Loadable(lazy(() => import('views/products')));
 // orders page routing
 const OrdersPage = Loadable(lazy(() => import('views/orders')));
 
-// orders page routing
+// invoice page routing
 const InvoicePage = Loadable(lazy(() => import('views/orders/Invoice')));
+
+// add invoice page routing
+const AddInvoicePage = Loadable(lazy(() => import('views/orders/AddInvoice')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -43,6 +46,10 @@ const MainRoutes = {
         {
             path: '/orders/:invoiceId',
             element: <InvoicePage />
+        },
+        {
+            path: '/orders/add',
+            element: <AddInvoicePage />
         },
         {
             path: '/utils/util-color',

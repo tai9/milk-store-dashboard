@@ -371,13 +371,13 @@ export default function ProductList({ data }) {
                                                 padding="normal"
                                                 onClick={(event) => handleClick(event, row)}
                                             >
-                                                {row.name}
+                                                {row.name || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {row.price}
+                                                {row.price || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {row.quantity}
+                                                {row.quantity || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 <Box width="100px">
@@ -385,18 +385,18 @@ export default function ProductList({ data }) {
                                                 </Box>
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {moment(row.created_date).format('DD-MM-YYYY, h:mm A')}
+                                                {moment(row.created_date).format('DD-MM-YYYY, h:mm A') || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {moment(row.updated_date).format('DD-MM-YYYY, h:mm A')}
+                                                {moment(row.updated_date).format('DD-MM-YYYY, h:mm A') || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {moment(row.expiry_date).format('DD-MM-YYYY, h:mm A')}
+                                                {moment(row.expiry_date).format('DD-MM-YYYY, h:mm A') || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 <Chip
                                                     size="small"
-                                                    label={row.status || 'Active'}
+                                                    label={row.status || 'Loading...'}
                                                     sx={{
                                                         color: theme.palette.background.default,
                                                         bgcolor:

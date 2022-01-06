@@ -139,7 +139,7 @@ const Invoice = () => {
                                             <TableCell align="center" colSpan={3}>
                                                 PRODUCT NAME
                                             </TableCell>
-                                            <TableCell align="right">QUANTITY</TableCell>
+                                            <TableCell align="right">AMOUNT</TableCell>
                                             <TableCell align="right">PRICE</TableCell>
                                             <TableCell align="right">TOTAL</TableCell>
                                         </TableRow>

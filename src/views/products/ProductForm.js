@@ -49,9 +49,6 @@ export default function ProductForm({ initialValues, onSubmit }) {
                 <Button fullWidth type="submit" variant="contained" color="primary" disabled={isSubmitting}>
                     {isSubmitting && <CircularProgress size={16} />} &nbsp; save
                 </Button>
-                <Button fullWidth color="secondary">
-                    Cancel
-                </Button>
             </Stack>
         </form>
     );

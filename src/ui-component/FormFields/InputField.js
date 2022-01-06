@@ -21,7 +21,7 @@ export function InputField({ name, control, label, ...inputProps }) {
             error={invalid}
             variant="outlined"
             // margin="dense"
-            // size="small"
+            size="small"
             fullWidth
             {...inputProps}
         />

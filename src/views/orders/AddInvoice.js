@@ -1,0 +1,56 @@
+import { productsApi } from 'apis';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProductList, selectProductList } from 'store/slices/productSlice';
+import SecondaryAction from 'ui-component/cards/CardSecondaryAction';
+import MainCard from 'ui-component/cards/MainCard';
+import InvoiceForm from './InvoiceForm';
+
+export const getInvoiceStatus = (status, theme) => {
+    switch (status) {
+        case 'Completed':
+            return theme.palette.success.dark;
+        case 'Processing':
+            return theme.palette.primary.main;
+        case 'Canceled':
+            return theme.palette.error.dark;
+        default:
+            return theme.palette.primary.dark;
+    }
+};
+
+const AddInvoice = () => {
+    const productList = useSelector(selectProductList);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const response = await productsApi.getAll();
+                console.log(response);
+
+                dispatch(fetchProductList(response));
+            } catch (error) {
+                console.log('Failed to fetch product list', error);
+            }
+        })();
+    }, [dispatch]);
+
+    const initialValues = {
+        name: '',
+        price: 0,
+        quantity: 0,
+        preview: []
+    };
+
+    const handleSubmitUserForm = async (formValues) => {
+        console.log(formValues);
+    };
+
+    return (
+        <MainCard title="Add Invoice" secondary={<SecondaryAction link="https://next.material-ui.com/system/palette/" />}>
+            <InvoiceForm productList={productList} initialValues={initialValues} onSubmit={handleSubmitUserForm} />
+        </MainCard>
+    );
+};
+export default AddInvoice;
