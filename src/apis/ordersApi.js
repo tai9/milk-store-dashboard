@@ -7,5 +7,8 @@ export const ordersApi = {
     },
     getById(id) {
         return axiosClient.get(`${ordersURL}/${id}`);
+    },
+    update(id, data) {
+        return axiosClient.put(`${ordersURL}/${id}`, data);
     }
 };

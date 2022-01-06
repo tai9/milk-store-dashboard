@@ -20,12 +20,16 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import { visuallyHidden } from '@mui/utils';
+import { ordersApi } from 'apis';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
+import { fetchProductList } from 'store/slices/productSlice';
 import { getInvoiceStatus } from './Invoice';
 import ProductForm from './ProductForm';
+import { toast } from 'react-toastify';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -209,7 +213,7 @@ EnhancedTableToolbar.propTypes = {
 
 export default function OrderList({ data }) {
     const theme = useTheme();
-
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const [order, setOrder] = useState('asc');
@@ -302,6 +306,18 @@ export default function OrderList({ data }) {
         }));
     };
 
+    const handleUpdateOrderStatus = async (id, status) => {
+        try {
+            await ordersApi.update(id, { status });
+            toast.success('Update order status success');
+            const response = await ordersApi.getAll();
+            dispatch(fetchProductList(response));
+        } catch (err) {
+            console.log(err);
+            toast.error('Something went wrong.');
+        }
+    };
+
     return (
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
@@ -341,7 +357,7 @@ export default function OrderList({ data }) {
                                             hover
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
-                                            key={row.seqId}
+                                            key={row._id}
                                             sx={{ cursor: 'pointer' }}
                                         >
                                             <TableCell
@@ -377,12 +393,18 @@ export default function OrderList({ data }) {
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Tooltip title="Confirm">
-                                                    <IconButton>
+                                                    <IconButton
+                                                        onClick={() => handleUpdateOrderStatus(row._id, 'Completed')}
+                                                        // disabled={row.status === 'Canceled' || row.status === 'Completed'}
+                                                    >
                                                         <DoneIcon fontSize="small" />
                                                     </IconButton>
                                                 </Tooltip>
                                                 <Tooltip title="Cancel">
-                                                    <IconButton>
+                                                    <IconButton
+                                                        // disabled={row.status === 'Canceled' || row.status === 'Completed'}
+                                                        onClick={() => handleUpdateOrderStatus(row._id, 'Canceled')}
+                                                    >
                                                         <BlockIcon fontSize="small" />
                                                     </IconButton>
                                                 </Tooltip>
