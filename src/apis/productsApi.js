@@ -7,5 +7,8 @@ export const productsApi = {
         const params = queryString.stringify(filterParams);
         const url = `${productsURL}?${params}`;
         return axiosClient.get(url);
+    },
+    update(id, data) {
+        return axiosClient.patch(`${productsURL}/${id}`, data);
     }
 };

@@ -2,11 +2,10 @@
 import { AddCircle, ContentCopyTwoTone, FilterList, PrintTwoTone, SearchOutlined } from '@mui/icons-material';
 import BlockIcon from '@mui/icons-material/Block';
 import DoneIcon from '@mui/icons-material/Done';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import DateAdapter from '@mui/lab/AdapterMoment';
 import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import { Chip, Drawer, InputAdornment, Menu, MenuItem, Stack, TextField, Typography, FormControl, InputLabel, Select } from '@mui/material';
+import { Chip, Drawer, FormControl, InputAdornment, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
@@ -29,9 +28,10 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 import { fetchProductList, selectProductList } from 'store/slices/productSlice';
-import ProductForm from './ProductForm';
 import { useDebouncedCallback } from 'use-debounce';
+import ProductForm from './ProductForm';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -256,7 +256,6 @@ export default function ProductList() {
     const [selected, setSelected] = useState([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [anchorEl, setAnchorEl] = useState(null);
     const [open, setOpen] = useState(false);
 
     const [productItem, setProductItem] = useState({
@@ -304,13 +303,6 @@ export default function ProductList() {
 
     const handleToggle = () => {
         setOpen(!open);
-    };
-
-    const handleOpenActions = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
     };
 
     const handleRequestSort = (event, property) => {
@@ -383,6 +375,24 @@ export default function ProductList() {
 
     const handleSearchChange = (event) => {
         debounced(event.target.value);
+    };
+
+    const handleUpdateProductStatus = async (id, status) => {
+        try {
+            await productsApi.update(id, { status });
+            toast.success('Update order status success');
+
+            const { name, expiryDate } = filters;
+            const response = await productsApi.getAll({
+                ...filters,
+                name: name === '' ? undefined : name,
+                expiryDate: expiryDate === null ? undefined : expiryDate
+            });
+            dispatch(fetchProductList(response));
+        } catch (err) {
+            console.log(err);
+            toast.error('Something went wrong.');
+        }
     };
 
     return (
@@ -476,39 +486,28 @@ export default function ProductList() {
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
-                                                <IconButton
-                                                    aria-controls="menu-earning-card"
-                                                    aria-haspopup="true"
-                                                    onClick={handleOpenActions}
-                                                >
-                                                    <MoreHorizIcon fontSize="inherit" />
-                                                </IconButton>
-                                                <Menu
-                                                    id="menu-action"
-                                                    anchorEl={anchorEl}
-                                                    keepMounted
-                                                    open={Boolean(anchorEl)}
-                                                    onClose={handleClose}
-                                                    variant="selectedMenu"
-                                                    anchorOrigin={{
-                                                        vertical: 'bottom',
-                                                        horizontal: 'right'
-                                                    }}
-                                                    transformOrigin={{
-                                                        vertical: 'top',
-                                                        horizontal: 'right'
-                                                    }}
-                                                >
-                                                    {row.status === 'Deactivate' ? (
-                                                        <MenuItem onClick={handleClose}>
-                                                            <DoneIcon fontSize="small" sx={{ mr: 1 }} /> Active
-                                                        </MenuItem>
-                                                    ) : (
-                                                        <MenuItem onClick={handleClose}>
-                                                            <BlockIcon fontSize="small" sx={{ mr: 1 }} /> Deactivate
-                                                        </MenuItem>
-                                                    )}
-                                                </Menu>
+                                                <Stack direction="row" spacing={1}>
+                                                    <Tooltip title="Active" placement="top">
+                                                        <div>
+                                                            <IconButton
+                                                                disabled={row.status === 'Active'}
+                                                                onClick={() => handleUpdateProductStatus(row._id, 'Active')}
+                                                            >
+                                                                <DoneIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </div>
+                                                    </Tooltip>
+                                                    <Tooltip title="Deactivate" placement="top">
+                                                        <div>
+                                                            <IconButton
+                                                                disabled={row.status === 'Deactivate'}
+                                                                onClick={() => handleUpdateProductStatus(row._id, 'Deactivate')}
+                                                            >
+                                                                <BlockIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </div>
+                                                    </Tooltip>
+                                                </Stack>
                                             </TableCell>
                                         </TableRow>
                                     );
