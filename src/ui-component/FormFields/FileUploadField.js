@@ -102,7 +102,7 @@ export function FileUploadField({ name, control }) {
     };
 
     const thumbs = files.map((file, idx) => (
-        <div style={thumb} key={file.name}>
+        <div style={thumb} key={idx}>
             <div
                 role="button"
                 tabIndex={0}
