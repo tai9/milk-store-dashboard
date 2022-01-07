@@ -12,7 +12,7 @@ export const ordersSlice = createSlice({
     name: 'orders',
     initialState,
     reducers: {
-        fetchProductList: (state, action) => {
+        fetchOrderList: (state, action) => {
             state.data = action.payload.data;
             state.pagination = action.payload.pagination;
         }
@@ -20,7 +20,7 @@ export const ordersSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { fetchProductList } = ordersSlice.actions;
+export const { fetchOrderList } = ordersSlice.actions;
 
 // Selector
 export const selectOrderList = (state) => state.orders;

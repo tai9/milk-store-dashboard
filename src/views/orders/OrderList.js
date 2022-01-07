@@ -4,7 +4,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import DateAdapter from '@mui/lab/AdapterMoment';
 import DatePicker from '@mui/lab/DatePicker';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import { Chip, Drawer, InputAdornment, Stack, TextField, Typography } from '@mui/material';
+import { Chip, FormControl, InputAdornment, Stack, TextField, Typography, InputLabel, Select, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
@@ -23,13 +23,15 @@ import { visuallyHidden } from '@mui/utils';
 import { ordersApi } from 'apis';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { fetchProductList } from 'store/slices/productSlice';
 import { getInvoiceStatus } from './Invoice';
-import InvoiceForm from './InvoiceForm';
 import { toast } from 'react-toastify';
+import { useDebouncedCallback } from 'use-debounce';
+import { fetchOrderList } from 'store/slices/orderSlice';
+import numberWithCommas from 'utils/number-with-commas';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -145,7 +147,7 @@ EnhancedTableHead.propTypes = {
     orderBy: PropTypes.string.isRequired
 };
 
-const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct }) => (
+const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct, handleStatusChange, handleSearchChange }) => (
     <Toolbar
         sx={{
             pl: { sm: 2 },
@@ -161,6 +163,8 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct }) => (
                 id="outlined-start-adornment"
                 sx={{ width: '30ch' }}
                 size="small"
+                defaultValue=""
+                onChange={handleSearchChange}
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
@@ -178,6 +182,22 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct }) => (
                     renderInput={(params) => <TextField size="small" {...params} />}
                 />
             </LocalizationProvider>
+            <FormControl sx={{ minWidth: 120, textAlign: 'center' }}>
+                <InputLabel id="demo-simple-select-label">Status</InputLabel>
+                <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="Status"
+                    size="small"
+                    defaultValue="All"
+                    onChange={handleStatusChange}
+                >
+                    <MenuItem value="All">All</MenuItem>
+                    <MenuItem value="Completed">Completed</MenuItem>
+                    <MenuItem value="Processing">Processing</MenuItem>
+                    <MenuItem value="Canceled">Canceled</MenuItem>
+                </Select>
+            </FormControl>
         </Stack>
 
         <Stack direction="row" justifyContent="flex-end" width="100%">
@@ -208,7 +228,9 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct }) => (
 EnhancedTableToolbar.propTypes = {
     date: PropTypes.string,
     handleDateChange: PropTypes.func.isRequired,
-    handleAddProduct: PropTypes.func.isRequired
+    handleAddProduct: PropTypes.func.isRequired,
+    handleStatusChange: PropTypes.func.isRequired,
+    handleSearchChange: PropTypes.func.isRequired
 };
 
 export default function OrderList({ data }) {
@@ -221,30 +243,35 @@ export default function OrderList({ data }) {
     const [selected, setSelected] = useState([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [open, setOpen] = useState(false);
 
-    const [productItem, setProductItem] = useState({
-        name: '',
-        price: 0,
-        quantity: 0,
-        preview: []
-    });
     const [filters, setFilters] = useState({
-        search: '',
-        expiryDate: null
+        seqId: '',
+        createdDate: null,
+        status: undefined
     });
 
-    const initialValues = {
-        name: '',
-        price: 0,
-        quantity: 0,
-        preview: [],
-        ...productItem
-    };
+    const debounced = useDebouncedCallback((value) => {
+        setFilters((prev) => ({
+            ...prev,
+            seqId: value
+        }));
+    }, 500);
 
-    const handleToggle = () => {
-        setOpen(!open);
-    };
+    useEffect(() => {
+        (async () => {
+            try {
+                const { seqId, createdDate } = filters;
+                const response = await ordersApi.getAll({
+                    ...filters,
+                    seqId: seqId === '' ? undefined : seqId,
+                    createdDate: createdDate === null ? undefined : createdDate
+                });
+                dispatch(fetchOrderList(response));
+            } catch (error) {
+                console.log('Failed to fetch product list', error);
+            }
+        })();
+    }, [filters, dispatch]);
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -277,7 +304,6 @@ export default function OrderList({ data }) {
         }
 
         setSelected(newSelected);
-        setProductItem({ ...row });
         navigate(`/orders/${row._id}`);
     };
 
@@ -295,15 +321,23 @@ export default function OrderList({ data }) {
     // Avoid a layout jump when reaching the last page with empty data.
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
 
-    const handleSubmitUserForm = async (formValues) => {
-        console.log(formValues);
-    };
-
     const handleDateChange = (date) => {
         setFilters((prev) => ({
             ...prev,
-            expiryDate: date
+            createdDate: new Date(date).toISOString()
         }));
+    };
+
+    const handleStatusChange = (event) => {
+        const { value } = event.target;
+        setFilters((prev) => ({
+            ...prev,
+            status: value === 'All' ? undefined : value
+        }));
+    };
+
+    const handleSearchChange = (event) => {
+        debounced(event.target.value);
     };
 
     const handleUpdateOrderStatus = async (id, status) => {
@@ -322,15 +356,11 @@ export default function OrderList({ data }) {
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
                 <EnhancedTableToolbar
-                    date={filters.expiryDate}
+                    date={filters.createdDate}
                     handleDateChange={handleDateChange}
+                    handleStatusChange={handleStatusChange}
+                    handleSearchChange={handleSearchChange}
                     handleAddProduct={() => {
-                        setProductItem({
-                            name: '',
-                            price: 0,
-                            quantity: 0,
-                            preview: []
-                        });
                         navigate('/orders/add');
                     }}
                 />
@@ -376,7 +406,7 @@ export default function OrderList({ data }) {
                                                 {row.totalAmount || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {row.totalPayment || '-'}
+                                                {numberWithCommas(row.totalPayment)}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 {moment(row.createdDate).format('DD-MM-YYYY, h:mm A') || '-'}
@@ -392,26 +422,28 @@ export default function OrderList({ data }) {
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
-                                                <Tooltip title="Confirm">
-                                                    <div>
-                                                        <IconButton
-                                                            disabled={row.status === 'Canceled' || row.status === 'Completed'}
-                                                            onClick={() => handleUpdateOrderStatus(row._id, 'Completed')}
-                                                        >
-                                                            <DoneIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </div>
-                                                </Tooltip>
-                                                <Tooltip title="Cancel">
-                                                    <div>
-                                                        <IconButton
-                                                            disabled={row.status === 'Canceled' || row.status === 'Completed'}
-                                                            onClick={() => handleUpdateOrderStatus(row._id, 'Canceled')}
-                                                        >
-                                                            <BlockIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </div>
-                                                </Tooltip>
+                                                <Stack direction="row" spacing={1}>
+                                                    <Tooltip title="Confirm" placement="top">
+                                                        <div>
+                                                            <IconButton
+                                                                disabled={row.status === 'Canceled' || row.status === 'Completed'}
+                                                                onClick={() => handleUpdateOrderStatus(row._id, 'Completed')}
+                                                            >
+                                                                <DoneIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </div>
+                                                    </Tooltip>
+                                                    <Tooltip title="Cancel" placement="top">
+                                                        <div>
+                                                            <IconButton
+                                                                disabled={row.status === 'Canceled' || row.status === 'Completed'}
+                                                                onClick={() => handleUpdateOrderStatus(row._id, 'Canceled')}
+                                                            >
+                                                                <BlockIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </div>
+                                                    </Tooltip>
+                                                </Stack>
                                             </TableCell>
                                         </TableRow>
                                     );
@@ -438,24 +470,6 @@ export default function OrderList({ data }) {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-
-            <Drawer
-                anchor="right"
-                onClose={handleToggle}
-                open={open}
-                PaperProps={{
-                    sx: {
-                        width: 280
-                    }
-                }}
-            >
-                <Box px={2} py={4}>
-                    <Typography component="h3" variant="h3">
-                        Invoice Information
-                    </Typography>
-                </Box>
-                <InvoiceForm initialValues={initialValues} onSubmit={handleSubmitUserForm} />
-            </Drawer>
         </Box>
     );
 }

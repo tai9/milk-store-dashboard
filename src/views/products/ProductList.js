@@ -31,6 +31,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { fetchProductList, selectProductList } from 'store/slices/productSlice';
 import { useDebouncedCallback } from 'use-debounce';
+import numberWithCommas from 'utils/number-with-commas';
 import ProductForm from './ProductForm';
 
 function descendingComparator(a, b, orderBy) {
@@ -203,7 +204,6 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct, handle
                     label="Status"
                     size="small"
                     defaultValue="All"
-                    // value={age}
                     onChange={handleStatusChange}
                 >
                     <MenuItem value="All">All</MenuItem>
@@ -453,7 +453,7 @@ export default function ProductList() {
                                                 {row.name || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
-                                                {row.price || '-'}
+                                                {numberWithCommas(row.price)}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 {row.quantity || '-'}

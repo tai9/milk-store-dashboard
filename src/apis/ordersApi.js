@@ -1,9 +1,12 @@
 import axiosClient from 'axios-client';
 import { ordersURL } from 'constants/baseURL';
+import queryString from 'query-string';
 
 export const ordersApi = {
-    getAll() {
-        return axiosClient.get(ordersURL);
+    getAll(filterParams) {
+        const params = queryString.stringify(filterParams);
+        const url = `${ordersURL}?${params}`;
+        return axiosClient.get(url);
     },
     getById(id) {
         return axiosClient.get(`${ordersURL}/${id}`);
