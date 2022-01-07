@@ -29,7 +29,7 @@ const AddInvoice = () => {
     useEffect(() => {
         (async () => {
             try {
-                const response = await productsApi.getAll({ status: 'Active' });
+                const response = await productsApi.getAll({ page: 1, limit: 100, status: 'Active' });
                 dispatch(fetchProductList(response));
             } catch (error) {
                 console.log('Failed to fetch product list', error);

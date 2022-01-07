@@ -24,13 +24,12 @@ import { ordersApi } from 'apis';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { fetchProductList } from 'store/slices/productSlice';
 import { getInvoiceStatus } from './Invoice';
 import { toast } from 'react-toastify';
 import { useDebouncedCallback } from 'use-debounce';
-import { fetchOrderList } from 'store/slices/orderSlice';
+import { fetchOrderList, selectOrderList } from 'store/slices/orderSlice';
 import numberWithCommas from 'utils/number-with-commas';
 
 function descendingComparator(a, b, orderBy) {
@@ -91,6 +90,12 @@ const headCells = [
         numeric: false,
         disablePadding: false,
         label: 'Created Date'
+    },
+    {
+        id: 'updatedDate',
+        numeric: false,
+        disablePadding: false,
+        label: 'Updated Date'
     },
     {
         id: 'status',
@@ -233,10 +238,12 @@ EnhancedTableToolbar.propTypes = {
     handleSearchChange: PropTypes.func.isRequired
 };
 
-export default function OrderList({ data }) {
+export default function OrderList() {
     const theme = useTheme();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    const orderList = useSelector(selectOrderList);
 
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('calories');
@@ -245,6 +252,8 @@ export default function OrderList({ data }) {
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
     const [filters, setFilters] = useState({
+        page: 1,
+        limit: 100,
         seqId: '',
         createdDate: null,
         status: undefined
@@ -281,7 +290,7 @@ export default function OrderList({ data }) {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelecteds = data.map((n) => n.name);
+            const newSelecteds = orderList.data.map((n) => n.name);
             setSelected(newSelecteds);
             return;
         }
@@ -319,7 +328,7 @@ export default function OrderList({ data }) {
     const isSelected = (name) => selected.indexOf(name) !== -1;
 
     // Avoid a layout jump when reaching the last page with empty data.
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
+    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - orderList.data.length) : 0;
 
     const handleDateChange = (date) => {
         setFilters((prev) => ({
@@ -344,8 +353,12 @@ export default function OrderList({ data }) {
         try {
             await ordersApi.update(id, { status });
             toast.success('Update order status success');
-            const response = await ordersApi.getAll();
-            dispatch(fetchProductList(response));
+            const response = await ordersApi.getAll({
+                ...filters,
+                seqId: filters.seqId === '' ? undefined : filters.seqId,
+                createdDate: filters.createdDate === null ? undefined : filters.createdDate
+            });
+            dispatch(fetchOrderList(response));
         } catch (err) {
             console.log(err);
             toast.error('Something went wrong.');
@@ -371,12 +384,12 @@ export default function OrderList({ data }) {
                             orderBy={orderBy}
                             onSelectAllClick={handleSelectAllClick}
                             onRequestSort={handleRequestSort}
-                            rowCount={data.length}
+                            rowCount={orderList.data.length}
                         />
                         <TableBody>
                             {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                  data.slice().sort(getComparator(order, orderBy)) */}
-                            {stableSort(data, getComparator(order, orderBy))
+                            {stableSort(orderList.data, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
                                     const isItemSelected = isSelected(row.name);
@@ -410,6 +423,9 @@ export default function OrderList({ data }) {
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 {moment(row.createdDate).format('DD-MM-YYYY, h:mm A') || '-'}
+                                            </TableCell>
+                                            <TableCell align="center" onClick={(event) => handleClick(event, row)}>
+                                                {moment(row.updatedDate).format('DD-MM-YYYY, h:mm A') || '-'}
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 <Chip
@@ -463,7 +479,7 @@ export default function OrderList({ data }) {
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
-                    count={data.length}
+                    count={orderList.data.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
@@ -473,11 +489,3 @@ export default function OrderList({ data }) {
         </Box>
     );
 }
-
-OrderList.defaultProps = {
-    data: []
-};
-
-OrderList.propTypes = {
-    data: PropTypes.array.isRequired || []
-};

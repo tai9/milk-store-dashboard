@@ -1,4 +1,3 @@
-// icons
 import { AddCircle, ContentCopyTwoTone, FilterList, PrintTwoTone, SearchOutlined } from '@mui/icons-material';
 import BlockIcon from '@mui/icons-material/Block';
 import DoneIcon from '@mui/icons-material/Done';
@@ -22,8 +21,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import { visuallyHidden } from '@mui/utils';
 import { productsApi } from 'apis';
-// assets
-import productEmptyImg from 'assets/images/products/product-empty.png';
+import { EMPTY_PRODUCT_URL } from 'constants/common';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
@@ -262,9 +260,12 @@ export default function ProductList() {
         name: '',
         price: 0,
         quantity: 0,
-        preview: []
+        expiryDate: new Date(),
+        preview: EMPTY_PRODUCT_URL
     });
     const [filters, setFilters] = useState({
+        page: 1,
+        limit: 100,
         name: '',
         expiryDate: null,
         status: undefined
@@ -281,7 +282,8 @@ export default function ProductList() {
         name: '',
         price: 0,
         quantity: 0,
-        preview: [],
+        expiryDate: new Date(),
+        preview: EMPTY_PRODUCT_URL,
         ...productItem
     };
 
@@ -355,7 +357,27 @@ export default function ProductList() {
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - productList.data.length) : 0;
 
     const handleSubmitUserForm = async (formValues) => {
-        console.log(formValues);
+        try {
+            if (formValues._id) {
+                await productsApi.update(formValues._id, formValues);
+                toast.success('Update product success');
+            } else {
+                await productsApi.add({ ...formValues, expiryDate: formValues.expiryDate.toISOString() });
+                toast.success('Add product success');
+            }
+            handleToggle();
+
+            const { name, expiryDate } = filters;
+            const response = await productsApi.getAll({
+                ...filters,
+                name: name === '' ? undefined : name,
+                expiryDate: expiryDate === null ? undefined : expiryDate
+            });
+            dispatch(fetchProductList(response));
+        } catch (err) {
+            console.log(err);
+            toast.error('Something went wrong.');
+        }
     };
 
     const handleDateChange = (date) => {
@@ -408,7 +430,7 @@ export default function ProductList() {
                             name: '',
                             price: 0,
                             quantity: 0,
-                            preview: []
+                            preview: EMPTY_PRODUCT_URL
                         });
                         handleToggle();
                     }}
@@ -460,7 +482,7 @@ export default function ProductList() {
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>
                                                 <Box width="100px">
-                                                    <img src={row.preview || productEmptyImg} alt={row} width="50%" />
+                                                    <img src={row.preview || EMPTY_PRODUCT_URL} alt={row} width="30%" />
                                                 </Box>
                                             </TableCell>
                                             <TableCell align="center" onClick={(event) => handleClick(event, row)}>

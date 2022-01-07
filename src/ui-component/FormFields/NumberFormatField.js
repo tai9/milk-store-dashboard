@@ -15,7 +15,7 @@ const NumberFormatCustom = forwardRef((props, ref) => {
                 onChange({
                     target: {
                         name: props.name,
-                        value: values.value
+                        value: +values.value
                     }
                 });
             }}
@@ -49,8 +49,7 @@ export function NumberFormatField({ name, control, label, InputProps, ...props }
             onBlur={onBlur}
             error={invalid}
             variant="outlined"
-            // margin="dense"
-            // size="small"
+            size="small"
             fullWidth
             InputProps={{
                 inputComponent: NumberFormatCustom,

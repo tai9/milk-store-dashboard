@@ -1,25 +1,16 @@
 import { Button, CircularProgress, Grid, Stack } from '@mui/material';
 import { useForm } from 'react-hook-form';
-// third-party
 import PerfectScrollbar from 'react-perfect-scrollbar';
-// project imports
 import { gridSpacing } from 'store/types/common';
-import { FileUploadField, InputField, NumberFormatField } from 'ui-component/FormFields';
+import { DatePickerField, InputField, NumberFormatField } from 'ui-component/FormFields';
 
 export default function ProductForm({ initialValues, onSubmit }) {
-    // const schemaRequired = yup
-    //     .object({
-    //         transactionHashes: yup.array().min(1, t('Please select transaction hash')).required(t('Please select transaction hash'))
-    //     })
-    //     .required();
-
     const {
         control,
         handleSubmit,
         formState: { isSubmitting }
     } = useForm({
         defaultValues: initialValues
-        // resolver: yupResolver()
     });
 
     const handleSubmitForm = async (formValues) => {
@@ -40,7 +31,7 @@ export default function ProductForm({ initialValues, onSubmit }) {
                         <NumberFormatField name="quantity" control={control} label="Quantity" />
                     </Grid>
                     <Grid item xs={12}>
-                        <FileUploadField name="preview" control={control} label="Preview" />
+                        <DatePickerField name="expiryDate" control={control} label="Expiry Date" />
                     </Grid>
                 </Grid>
             </PerfectScrollbar>

@@ -145,7 +145,7 @@ const Invoice = () => {
                                     </TableHead>
                                     <TableBody>
                                         {orderDetails?.products?.map((row) => (
-                                            <TableRow key={row.id}>
+                                            <TableRow key={row._id}>
                                                 <TableCell colSpan={3}>
                                                     <Typography fontWeight="bold">{row.name}</Typography>
                                                 </TableCell>
