@@ -17,6 +17,7 @@ import { gridSpacing } from 'store/types/common';
 
 // chart data
 import chartData from './chart-data/total-growth-bar-chart';
+import numberWithCommas from 'utils/number-with-commas';
 
 const status = [
     {
@@ -35,7 +36,7 @@ const status = [
 
 // ==============================|| DASHBOARD DEFAULT - TOTAL GROWTH BAR CHART ||============================== //
 
-const TotalGrowthBarChart = ({ isLoading }) => {
+const TotalGrowthBarChart = ({ isLoading, statistics }) => {
     const [value, setValue] = useState('today');
     const theme = useTheme();
     const customization = useSelector((state) => state.customization);
@@ -90,7 +91,7 @@ const TotalGrowthBarChart = ({ isLoading }) => {
 
     return (
         <>
-            {isLoading ? (
+            {isLoading || statistics.series.length === 0 ? (
                 <SkeletonTotalGrowthBarChart />
             ) : (
                 <MainCard>
@@ -103,7 +104,7 @@ const TotalGrowthBarChart = ({ isLoading }) => {
                                             <Typography variant="subtitle2">Total Growth</Typography>
                                         </Grid>
                                         <Grid item>
-                                            <Typography variant="h3">$2,324.00</Typography>
+                                            <Typography variant="h3">{numberWithCommas(statistics.totalPayment)}₫</Typography>
                                         </Grid>
                                     </Grid>
                                 </Grid>
@@ -124,7 +125,7 @@ const TotalGrowthBarChart = ({ isLoading }) => {
                             </Grid>
                         </Grid>
                         <Grid item xs={12}>
-                            <Chart {...chartData} />
+                            <Chart {...chartData} series={statistics.series} />
                         </Grid>
                     </Grid>
                 </MainCard>
@@ -134,7 +135,8 @@ const TotalGrowthBarChart = ({ isLoading }) => {
 };
 
 TotalGrowthBarChart.propTypes = {
-    isLoading: PropTypes.bool
+    isLoading: PropTypes.bool,
+    statistics: PropTypes.object
 };
 
 export default TotalGrowthBarChart;

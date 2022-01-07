@@ -290,7 +290,6 @@ export default function ProductList() {
         (async () => {
             try {
                 const { name, expiryDate } = filters;
-                console.log(filters);
                 const response = await productsApi.getAll({
                     ...filters,
                     name: name === '' ? undefined : name,
@@ -428,7 +427,7 @@ export default function ProductList() {
                                             hover
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
-                                            key={row.name}
+                                            key={row._id}
                                             sx={{
                                                 cursor: 'pointer',
                                                 backgroundColor: isExpired ? theme.palette.orange.light : theme.palette.background.default

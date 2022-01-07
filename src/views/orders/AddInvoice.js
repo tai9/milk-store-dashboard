@@ -30,8 +30,6 @@ const AddInvoice = () => {
         (async () => {
             try {
                 const response = await productsApi.getAll();
-                console.log(response);
-
                 dispatch(fetchProductList(response));
             } catch (error) {
                 console.log('Failed to fetch product list', error);

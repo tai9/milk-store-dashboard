@@ -52,7 +52,6 @@ const Invoice = () => {
         (async () => {
             try {
                 const response = await ordersApi.getById(invoiceId);
-                console.log(response);
                 setOrderDetails(response);
             } catch (error) {
                 console.log('Failed to fetch order list', error);

@@ -14,8 +14,6 @@ const Orders = () => {
         (async () => {
             try {
                 const response = await ordersApi.getAll();
-                console.log(response);
-
                 dispatch(fetchProductList(response));
             } catch (error) {
                 console.log('Failed to fetch order list', error);
