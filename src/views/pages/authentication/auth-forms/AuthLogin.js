@@ -53,6 +53,7 @@ const FirebaseLogin = ({ ...others }) => {
     const handleLoginSuccess = (data) => {
         cookies.set('token', data.access_token);
         cookies.set('username', data.name);
+        cookies.set('role', data.role);
         window.location.replace('/');
     };
 

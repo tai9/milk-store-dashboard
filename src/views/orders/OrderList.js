@@ -1,3 +1,4 @@
+import cookies from 'js-cookie';
 import { AddCircle, ContentCopyTwoTone, FilterList, PrintTwoTone, SearchOutlined } from '@mui/icons-material';
 import BlockIcon from '@mui/icons-material/Block';
 import DoneIcon from '@mui/icons-material/Done';
@@ -152,7 +153,7 @@ EnhancedTableHead.propTypes = {
     orderBy: PropTypes.string.isRequired
 };
 
-const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct, handleStatusChange, handleSearchChange }) => (
+const EnhancedTableToolbar = ({ role, date, handleDateChange, handleAddProduct, handleStatusChange, handleSearchChange }) => (
     <Toolbar
         sx={{
             pl: { sm: 2 },
@@ -222,7 +223,7 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct, handle
                 </IconButton>
             </Tooltip>
             <Tooltip title="Add">
-                <IconButton color="primary" onClick={handleAddProduct}>
+                <IconButton disabled={role === 'stocker'} color="primary" onClick={handleAddProduct}>
                     <AddCircle />
                 </IconButton>
             </Tooltip>
@@ -231,6 +232,7 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct, handle
 );
 
 EnhancedTableToolbar.propTypes = {
+    role: PropTypes.string,
     date: PropTypes.string,
     handleDateChange: PropTypes.func.isRequired,
     handleAddProduct: PropTypes.func.isRequired,
@@ -244,6 +246,8 @@ export default function OrderList() {
     const navigate = useNavigate();
 
     const orderList = useSelector(selectOrderList);
+
+    const role = cookies.get('role');
 
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('calories');
@@ -369,6 +373,7 @@ export default function OrderList() {
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
                 <EnhancedTableToolbar
+                    role={role}
                     date={filters.createdDate}
                     handleDateChange={handleDateChange}
                     handleStatusChange={handleStatusChange}

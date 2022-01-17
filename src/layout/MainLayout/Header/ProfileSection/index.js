@@ -47,6 +47,7 @@ const ProfileSection = () => {
     const navigate = useNavigate();
 
     const username = cookies.get('username');
+    const role = cookies.get('role');
 
     const [sdm, setSdm] = useState(true);
     const [value, setValue] = useState('');
@@ -60,6 +61,7 @@ const ProfileSection = () => {
     const handleLogout = async () => {
         cookies.remove('username');
         cookies.remove('token');
+        cookies.remove('role');
         navigate('/', { replace: true });
     };
 
@@ -166,7 +168,7 @@ const ProfileSection = () => {
                                                     {username || 'Johne Doe'}
                                                 </Typography>
                                             </Stack>
-                                            <Typography variant="subtitle2">Project Admin</Typography>
+                                            <Typography variant="subtitle2">{role.toUpperCase()}</Typography>
                                         </Stack>
                                         <OutlinedInput
                                             sx={{ width: '100%', pr: 1, pl: 2, my: 2 }}

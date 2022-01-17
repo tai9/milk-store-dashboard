@@ -31,6 +31,7 @@ import { fetchProductList, selectProductList } from 'store/slices/productSlice';
 import { useDebouncedCallback } from 'use-debounce';
 import numberWithCommas from 'utils/number-with-commas';
 import ProductForm from './ProductForm';
+import cookies from 'js-cookie';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -158,7 +159,7 @@ EnhancedTableHead.propTypes = {
     orderBy: PropTypes.string.isRequired
 };
 
-const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct, handleStatusChange, handleSearchChange }) => (
+const EnhancedTableToolbar = ({ role, date, handleDateChange, handleAddProduct, handleStatusChange, handleSearchChange }) => (
     <Toolbar
         sx={{
             pl: { sm: 2 },
@@ -228,7 +229,7 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct, handle
                 </IconButton>
             </Tooltip>
             <Tooltip title="Add">
-                <IconButton color="primary" onClick={handleAddProduct}>
+                <IconButton disabled={role === 'employee'} color="primary" onClick={handleAddProduct}>
                     <AddCircle />
                 </IconButton>
             </Tooltip>
@@ -237,6 +238,7 @@ const EnhancedTableToolbar = ({ date, handleDateChange, handleAddProduct, handle
 );
 
 EnhancedTableToolbar.propTypes = {
+    role: PropTypes.string,
     date: PropTypes.string,
     handleDateChange: PropTypes.func.isRequired,
     handleAddProduct: PropTypes.func.isRequired,
@@ -248,6 +250,8 @@ export default function ProductList() {
     const theme = useTheme();
     const dispatch = useDispatch();
     const productList = useSelector(selectProductList);
+
+    const role = cookies.get('role');
 
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('calories');
@@ -421,6 +425,7 @@ export default function ProductList() {
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
                 <EnhancedTableToolbar
+                    role={role}
                     date={filters.expiryDate}
                     handleDateChange={handleDateChange}
                     handleStatusChange={handleStatusChange}
